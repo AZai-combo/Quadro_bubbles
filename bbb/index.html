@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Chart Visualization</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        #app {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .bubble-chart {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 20px 0;
+            position: relative;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+        }
+        .success {
+            color: green;
+            margin: 10px 0;
+        }
+        .controls {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .weight-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 20px;
+            align-items: center;
+        }
+        .weight-controls .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .weight-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            min-width: 40px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .weight-button {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+            font-size: 0.9em;
+        }
+        .weight-button:hover {
+            background-color: #e0e0e0;
+        }
+        .weight-button.active {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        .file-input {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>{{ title }}</h1>
+        <div class="error" v-if="error">{{ error }}</div>
+        <div class="success" v-if="isFileLoaded">Данные успешно загружены</div>
+        <div v-if="!isFileLoaded">
+            <p>Требуемая структура данных в Excel файле:</p>
+            <ul>
+                <li>X - горизонтальная координата (число)</li>
+                <li>Y - вертикальная координата (число)</li>
+                <li>R - радиус пузырька (число)</li>
+                <li>Name - имя точки (текст)</li>
+            </ul>
+            <div class="file-input">
+                <input type="file" @change="handleFileUpload" accept=".xlsx,.xls">
+            </div>
+        </div>
+        <div class="bubble-chart" v-if="data.length">
+            <div id="chart"></div>
+            <div class="controls">
+                <button @click="increaseMaxRows" :disabled="maxRows >= allData.length">+{{ stepWeight }} точек</button>
+                <button @click="decreaseMaxRows" :disabled="maxRows <= stepWeight">-{{ stepWeight }} точек</button>
+                <div class="weight-controls">
+                    <div class="label">Шаг изменения:</div>
+                    <div class="weight-buttons">
+                        <button 
+                            v-for="weight in availableWeights" 
+                            :key="weight"
+                            @click="setStepWeight(weight)"
+                            :class="['weight-button', { active: stepWeight === weight }]"
+                        >
+                            {{ weight }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html> 
